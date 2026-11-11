@@ -1,0 +1,26 @@
+name: Build mod
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+      - name: Descomprimir proyecto
+        run: for z in *.zip; do unzip -q "$z" -d proj; done
+      - name: Instalar Gradle 4.9
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-4.9-bin.zip
+          unzip -q gradle-4.9-bin.zip
+      - name: Compilar
+        working-directory: proj/RubiMod
+        run: ${{ github.workspace }}/gradle-4.9/bin/gradle setupCIWorkspace build --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rubimod-jar
+          path: proj/RubiMod/build/libs/*.jar
